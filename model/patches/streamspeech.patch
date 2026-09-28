@@ -1,0 +1,84 @@
+diff --git a/SimulEval/simuleval/evaluator/scorers/quality_scorer.py b/SimulEval/simuleval/evaluator/scorers/quality_scorer.py
+index 52c6a3c..9610a62 100644
+--- a/SimulEval/simuleval/evaluator/scorers/quality_scorer.py
++++ b/SimulEval/simuleval/evaluator/scorers/quality_scorer.py
+@@ -288,7 +288,7 @@ class WhisperASRSacreBLEUScorer(QualityScorer):
+ 
+         root_dir = wav_dir.parent
+         transcripts_path = root_dir / "asr_transcripts.txt"
+-        with open(transcripts_path, "w") as f:
++        with open(transcripts_path, "w", encoding="utf-8") as f:
+             for line in transcripts:
+                 f.write(line + "\n")
+ 
+diff --git a/agent/sequence_generator.py b/agent/sequence_generator.py
+index e364eaf..fb7cea0 100644
+--- a/agent/sequence_generator.py
++++ b/agent/sequence_generator.py
+@@ -268,6 +268,16 @@ class SequenceGenerator(SequenceGeneratorBase):
+                     dim=-1,
+                 )
+ 
++        if prefix_tokens is not None and start > 0 and beam_size > 1:
++            # The loop below starts at `start` with every beam holding the same
++            # prefix and a cumulative score of 0, so the first search step would
++            # produce beam_size identical copies of the top token and beam search
++            # degenerates to greedy.  Mark beams 1..k-1 as dead so that the first
++            # free step expands from beam 0 only (same as fairseq's step-0 rule).
++            dead = torch.ones(bsz, beam_size, dtype=torch.bool, device=scores.device)
++            dead[:, 0] = False
++            scores.view(bsz, beam_size, -1)[:, :, start - 1][dead] = -math.inf
++
+         attn: Optional[Tensor] = None
+ 
+         # A list that indicates candidates that should be ignored.
+diff --git a/fairseq/fairseq/data/audio/audio_utils.py b/fairseq/fairseq/data/audio/audio_utils.py
+index 590a749..e4eea73 100644
+--- a/fairseq/fairseq/data/audio/audio_utils.py
++++ b/fairseq/fairseq/data/audio/audio_utils.py
+@@ -43,9 +43,12 @@ def convert_waveform(
+         sample_rate (float): target sample rate
+     """
+     try:
++        import torchaudio
+         import torchaudio.sox_effects as ta_sox
+-    except ImportError:
+-        raise ImportError("Please install torchaudio: pip install torchaudio")
++
++        _has_sox = torchaudio._extension._SOX_INITIALIZED  # type: ignore[attr-defined]
++    except (ImportError, AttributeError):
++        _has_sox = False
+ 
+     effects = []
+     if normalize_volume:
+@@ -57,9 +60,27 @@ def convert_waveform(
+     if len(effects) > 0:
+         is_np_input = isinstance(waveform, np.ndarray)
+         _waveform = torch.from_numpy(waveform) if is_np_input else waveform
+-        converted, converted_sample_rate = ta_sox.apply_effects_tensor(
+-            _waveform, sample_rate, effects
+-        )
++        if _has_sox:
++            converted, converted_sample_rate = ta_sox.apply_effects_tensor(
++                _waveform, sample_rate, effects
++            )
++        else:
++            # torchaudio without libsox (e.g. Windows builds): replicate the
++            # effects with pure tensor ops
++            import torchaudio.functional as ta_F
++
++            converted, converted_sample_rate = _waveform, sample_rate
++            if normalize_volume:
++                peak = converted.abs().max()
++                if peak > 0:
++                    converted = converted / peak
++            if to_sample_rate is not None and to_sample_rate != sample_rate:
++                converted = ta_F.resample(
++                    converted, sample_rate, to_sample_rate
++                )
++                converted_sample_rate = to_sample_rate
++            if to_mono and converted.shape[0] > 1:
++                converted = converted.mean(dim=0, keepdim=True)
+         if is_np_input:
+             converted = converted.numpy()
+         return converted, converted_sample_rate

@@ -1,0 +1,19 @@
+# Simulation outputs
+sim/build/
+*.fsdb
+*.vcd
+*.vpd
+*.log
+*.jou
+*.pb
+*.wdb
+simv*
+csrc/
+ucli.key
+DVEfiles/
+verdiLog/
+novas*
+xsim.dir/
+.Xil/
+*.vvp
+__pycache__/

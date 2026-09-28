@@ -1,0 +1,9 @@
+npu,workload_case,measurement_phase,weight_zero_percent,activation_zero_percent,scaling_factor_mode,source_file,paired_static_file,sample_count,excluded_sample_count,mean_ch1_voltage_v,mean_ch1_power_mw,mean_ch2_voltage_v,mean_ch2_power_mw,mean_ch3_voltage_v,mean_ch3_power_mw,mean_total_ch1_ch2_mw,mean_total_all_channels_mw,active_minus_static_ch1_mw,active_minus_static_ch2_mw,active_minus_static_total_ch1_ch2_mw
+S2ST,random_sf,active,30.02,40.01,random_-2_to_2,power-random-active.csv,power-random-prepared-static.csv,15,0,0.799367,19.222103,0.801127,5.017563,1.79908,0.15592,24.239666,24.395586,8.776691,1.573308,10.349999
+S2ST,random_sf,static,30.02,40.01,random_-2_to_2,power-random-prepared-static.csv,,10,0,0.7993,10.445412,0.80112,3.444255,1.7991,0.143928,13.889667,14.033596,,,
+S2ST,random_sf,active,30.02,40.01,random_-2_to_2,power-random-sf-rematch-active.csv,power-random-sf-rematch-prepared-static.csv,15,0,0.799413,19.244543,0.80108,5.01679,1.799093,0.167915,24.261333,24.429249,8.461183,1.572085,10.033268
+S2ST,random_sf,static,30.02,40.01,random_-2_to_2,power-random-sf-rematch-prepared-static.csv,,15,0,0.79932,10.78336,0.801107,3.444705,1.799113,0.179911,14.228065,14.407976,,,
+S2ST,random_sf_zero,active,30.02,40.01,zero,power-random-zero-sf-active.csv,power-random-zero-sf-prepared-static.csv,15,0,0.79942,18.38666,0.801113,5.132093,1.7991,0.17991,23.518753,23.698662,7.595395,1.688156,9.283551
+S2ST,random_sf_zero,static,30.02,40.01,zero,power-random-zero-sf-prepared-static.csv,,15,0,0.799227,10.791265,0.801127,3.443937,1.799073,0.179907,14.235202,14.415109,,,
+S2ST,seeded,active,23.63,24.74,zero,power-seeded-active-matched.csv,power-seeded-prepared-static.csv,15,0,0.79946,18.227688,0.801087,5.095285,1.79914,0.119943,23.322973,23.442916,7.790455,1.655608,9.446063
+S2ST,seeded,static,23.63,24.74,zero,power-seeded-prepared-static.csv,,15,0,0.7994,10.437233,0.80108,3.439677,1.79918,0.167923,13.87691,14.044833,,,
